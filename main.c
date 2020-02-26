@@ -24,9 +24,9 @@ ComplexDig *compl_power(ComplexDig a, int n);
 ComplexDig *compl_conj(ComplexDig a);
 double compl_abs(ComplexDig a);
 void compl_print(ComplexDig* a);
-Array* CreateArray(int count, int byte, void* zero_value);
+Array* createArray(int count, int byte, void* zero_value);
 void print_array(Array* array);
-void SetArrayElem(void* array, int index, int byte, void* value);
+void setArrayElem(void* array, int index, int byte, void* value);
 Array* concatenateArrays(Array* array1, Array* array2);
 void fillComplexArray(Array* array);
 void fillRealArray(Array* array);
@@ -105,14 +105,14 @@ void compl_print(ComplexDig* a) {
     printf("%4f + i * %4f\n", a->re, a->im);
 }
 
-Array* CreateArray(int count, int byte, void* zero_value) {
+Array* createArray(int count, int byte, void* zero_value) { //создание массива
     int i;
     Array* arr = malloc(sizeof(Array));
 
     arr->byte = byte;
     arr->count = count;
 
-    if (byte == 8) {
+    if (byte == 8) {                                     //проверка типа
         arr->ptr = (double*) malloc(count * byte);
     } else if (byte == 16) {
         arr->ptr = (ComplexDig*) malloc(count * byte);
@@ -127,7 +127,7 @@ Array* CreateArray(int count, int byte, void* zero_value) {
     return arr;
 }
 
-void print_array(Array* array) {
+void print_array(Array* array) {  //вывод элементов массива в консоль
     int i;
 
     if (array == NULL) {
@@ -144,7 +144,7 @@ void print_array(Array* array) {
     printf("\n");
 }
 
-void SetArrayElem(void* array, int index, int byte, void* value) {
+void setArrayElem(void* array, int index, int byte, void* value) {  //установка элемента value на место index в массиве array
     memcpy(array + index * byte, value, byte);
 }
 
@@ -152,9 +152,9 @@ Array* concatenateArrays(Array* array1, Array* array2) {
     Array* arr;
 
     if (array1->byte == 8 && array2->byte == 8) {
-        arr = CreateArray(array1->count + array2->count, array1->byte, &realZero);
+        arr = createArray(array1->count + array2->count, array1->byte, &realZero);
     } else if (array1->byte == 16 && array2->byte == 16) {
-        arr = CreateArray(array1->count + array2->count, array1->byte, &complexZero);
+        arr = createArray(array1->count + array2->count, array1->byte, &complexZero);
     } else {
         printf("Concatenation is impossible");
         return NULL;
@@ -174,7 +174,7 @@ void fillRealArray(Array* array) {
             printf("%d number: ", i + 1);
             scanf("%lf", &realElem);
             printf("\n");
-            SetArrayElem(array->ptr, i, 8, &realElem);
+            setArrayElem(array->ptr, i, 8, &realElem);
         }
     } else {printf("The array is not real\n");}
 }
@@ -189,7 +189,7 @@ void fillComplexArray(Array* array) {
             printf("%d number - ", i + 1);
             scanf("%lf %lf", &complexElem.re, &complexElem.im);
             printf("\n");
-            SetArrayElem(array->ptr, i, 16, &complexElem);
+            setArrayElem(array->ptr, i, 16, &complexElem);
         }
     } else {printf("The array is not complex\n");}
 }
@@ -233,7 +233,7 @@ Array* realMap(double* (*func)(double*), Array* array) {
     Array* temp;
 
     if (array->byte == 8) {
-        temp = CreateArray(array->count, array->byte, &realZero);
+        temp = createArray(array->count, array->byte, &realZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
             *((double*) (temp->ptr + i)) = *func(array->ptr + i);
         }
@@ -247,7 +247,7 @@ Array* complexMap(ComplexDig* (*func)(ComplexDig*), Array* array) {
     Array* temp;
 
     if (array->byte == 16) {
-        temp = CreateArray(array->count, array->byte, &complexZero);
+        temp = createArray(array->count, array->byte, &complexZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
             *((ComplexDig*) (temp->ptr + i)) = *func(array->ptr + i);
         }
@@ -273,7 +273,7 @@ Array* realWhere(double (*func)(double*), Array* array) {
     Array* temp;
 
     if (array->byte == 8) {
-        temp = CreateArray(array->count, array->byte, &realZero);
+        temp = createArray(array->count, array->byte, &realZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
             *((double*) (temp->ptr + i)) = func((double*) (array->ptr + i));
         }
@@ -287,7 +287,7 @@ Array* complexWhere(ComplexDig (*func)(ComplexDig*), Array* array) {
     Array* temp;
 
     if (array->byte == 16) {
-        temp = CreateArray(array->count, array->byte, &complexZero);
+        temp = createArray(array->count, array->byte, &complexZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
             *((ComplexDig*) (temp->ptr + i)) = func((ComplexDig*) (array->ptr + i));
         }
@@ -339,10 +339,10 @@ int main() {
             scanf("%d", &size);
 
             if (req == 1) {
-                arr = CreateArray(size, 8, &realZero);
+                arr = createArray(size, 8, &realZero);
                 fillRealArray(arr);
             } else {
-                arr = CreateArray(size, 16, &complexZero);
+                arr = createArray(size, 16, &complexZero);
                 fillComplexArray(arr);
             }
         }
@@ -361,16 +361,20 @@ int main() {
 
             printf("Size of 1st array: ");
             scanf("%d", &size);
-            arr1 = CreateArray(size, 8, &realZero);
+            arr1 = createArray(size, 8, &realZero);
             fillRealArray(arr1);
 
             printf("Size of 2nd array: ");
             scanf("%d", &size);
-            arr2 = CreateArray(size, 8, &realZero);
+            arr2 = createArray(size, 8, &realZero);
             fillRealArray(arr2);
 
             concatArray = concatenateArrays(arr1, arr2);
             print_array(concatArray);
+
+            free(arr1);         //освобождение памяти
+            free(arr2);
+            free(concatArray);
         }
 
         if (req == 5) {
@@ -386,7 +390,7 @@ int main() {
         }
 
         if (req == 6) {
-            Array* mapedArray;
+            Array* mapedArray = NULL;
 
             if (arr == NULL) {
                 printf("The array doesn't exist!\n");
@@ -402,7 +406,7 @@ int main() {
         }
 
         if (req == 7) {
-            Array* whereArray;
+            Array* whereArray = NULL;
 
             if (arr == NULL) {
                 printf("The array doesn't exist!\n");
@@ -412,10 +416,12 @@ int main() {
             } else {
                 printf("The array is not real!\n");
             }
+
+            free(whereArray);
         }
 
         if (req == 8) {
-            Array* whereArray;
+            Array* whereArray = NULL;
 
             if (arr == NULL) {
                 printf("The array doesn't exist!\n");
@@ -425,6 +431,8 @@ int main() {
             } else {
                 printf("The array is not complex!\n");
             }
+
+            free(whereArray);
         }
 
     } while (req != 0);
