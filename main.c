@@ -275,7 +275,7 @@ Array* realWhere(double (*func)(double*), Array* array) {
     if (array->byte == 8) {
         temp = CreateArray(array->count, array->byte, &realZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
-            *((double*) (temp->ptr + i)) = func((double*) (temp->ptr + i));
+            *((double*) (temp->ptr + i)) = func((double*) (array->ptr + i));
         }
     } else {return NULL;}
 
@@ -289,7 +289,7 @@ Array* complexWhere(ComplexDig (*func)(ComplexDig*), Array* array) {
     if (array->byte == 16) {
         temp = CreateArray(array->count, array->byte, &complexZero);
         for (i = 0; i < temp->count * temp->byte; i += temp->byte) {
-            *((ComplexDig*) (temp->ptr + i)) = func((ComplexDig*) (temp->ptr + i));
+            *((ComplexDig*) (temp->ptr + i)) = func((ComplexDig*) (array->ptr + i));
         }
     } else {return NULL;}
 
@@ -299,17 +299,27 @@ Array* complexWhere(ComplexDig (*func)(ComplexDig*), Array* array) {
 double moreThanNull(double *num) {
     double val = *num;
     if (val > 0) {
-        return 56.0;
-    } else if (val == 0) {
-        return 14.0;
+        return 1.0f;
     } else {
-        return 167.0;
+        return 0.0f;
     }
+}
+
+ComplexDig imagineMoreThanNull(ComplexDig* num) {
+    ComplexDig val;
+    val.im = 0.0f;
+    if (num->im > 0) {
+        val.re = 1.0f;
+    } else {
+        val.re = 0.0f;
+    }
+
+    return val;
 }
 
 int main() {
     int req, size;
-    Array* Arr = NULL;
+    Array* arr = NULL;
 
     do {
         printf("Enter 1 to create array with real numbers\n");
@@ -318,7 +328,8 @@ int main() {
         printf("Enter 4 to concatenate 2 arrays\n");
         printf("Enter 5 to sort entered array\n");
         printf("Enter 6 to square the array's elements (function 'map')\n");
-        printf("Enter 7 to mark numbers more than 0 (if arrays is double)\n");
+        printf("Enter 7 to mark real numbers more than 0\n");
+        printf("Enter 8 to mark complex number with imagine part more than 0\n");
         printf("Enter 0 for exit\n\n");
 
         scanf("%d", &req);
@@ -328,19 +339,19 @@ int main() {
             scanf("%d", &size);
 
             if (req == 1) {
-                Arr = CreateArray(size, 8, &realZero);
-                fillRealArray(Arr);
+                arr = CreateArray(size, 8, &realZero);
+                fillRealArray(arr);
             } else {
-                Arr = CreateArray(size, 16, &complexZero);
-                fillComplexArray(Arr);
+                arr = CreateArray(size, 16, &complexZero);
+                fillComplexArray(arr);
             }
         }
 
         if (req == 3) {
-            if (Arr == NULL) {
+            if (arr == NULL) {
                 printf("The array doesn't exist!\n");
             } else {
-                print_array(Arr);
+                print_array(arr);
             }
         }
 
@@ -363,27 +374,27 @@ int main() {
         }
 
         if (req == 5) {
-            if (Arr == NULL) {
+            if (arr == NULL) {
                 printf("The array doesn't exist!\n");
-            } else if (Arr->byte == 8) {
-                sortRealArray(Arr);
-                print_array(Arr);
-            } else if (Arr->byte == 16) {
-                sortComplexArray(Arr);
-                print_array(Arr);
+            } else if (arr->byte == 8) {
+                sortRealArray(arr);
+                print_array(arr);
+            } else if (arr->byte == 16) {
+                sortComplexArray(arr);
+                print_array(arr);
             }
         }
 
         if (req == 6) {
             Array* mapedArray;
 
-            if (Arr == NULL) {
+            if (arr == NULL) {
                 printf("The array doesn't exist!\n");
-            } else if (Arr->byte == 8) {
-                mapedArray = realMap(realSquare, Arr);
-                print_array(mapedArray);
+            } else if (arr->byte == 8) {
+                arr = realMap(realSquare, arr);
+                print_array(arr);
             } else {
-                mapedArray = complexMap(complexSquare, Arr);
+                mapedArray = complexMap(complexSquare, arr);
                 print_array(mapedArray);
             }
 
@@ -393,16 +404,31 @@ int main() {
         if (req == 7) {
             Array* whereArray;
 
-            if (Arr == NULL) {
+            if (arr == NULL) {
                 printf("The array doesn't exist!\n");
-            } else if (Arr->byte == 8) {
-                whereArray = realWhere(moreThanNull, Arr);
+            } else if (arr->byte == 8) {
+                whereArray = realWhere(moreThanNull, arr);
                 print_array(whereArray);
             } else {
                 printf("The array is not real!\n");
             }
         }
 
+        if (req == 8) {
+            Array* whereArray;
+
+            if (arr == NULL) {
+                printf("The array doesn't exist!\n");
+            } else if (arr->byte == 16) {
+                whereArray = complexWhere(imagineMoreThanNull, arr);
+                print_array(whereArray);
+            } else {
+                printf("The array is not complex!\n");
+            }
+        }
+
     } while (req != 0);
+
+    free(arr);
     return 0;
 }
