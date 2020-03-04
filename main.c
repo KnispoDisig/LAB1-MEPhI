@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 typedef struct ComplexDig {
     double re, im;
@@ -22,6 +23,7 @@ ComplexDig *compl_mult(ComplexDig a, ComplexDig b);
 ComplexDig *compl_div(ComplexDig a, ComplexDig b);
 ComplexDig *compl_power(ComplexDig a, int n);
 ComplexDig *compl_conj(ComplexDig a);
+int complex_equals(ComplexDig, ComplexDig);
 double compl_abs(ComplexDig a);
 void compl_print(ComplexDig* a);
 Array* createArray(int count, int byte, void* zero_value);
@@ -95,6 +97,14 @@ ComplexDig *compl_conj(ComplexDig a) {
     temp->im = (-1) * a.im;
 
     return temp;
+}
+
+int complex_equals(ComplexDig a, ComplexDig b) {
+    if (a.im == b.im && a.re == b.re) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 double compl_abs(ComplexDig a) {
@@ -317,9 +327,77 @@ ComplexDig imagineMoreThanNull(ComplexDig* num) {
     return val;
 }
 
+void testSortReal() {
+    int i, j, err = 0;
+    Array* arr = createArray(10, 8, &realZero);
+
+    for (i = 0; i < 100; i++) {
+        for (j = 0; j < arr->count * arr->byte; j += arr->byte) {
+            *((double*) (arr + j)) = rand() % 300 - 150;
+        }
+        sortRealArray(arr);
+        for (j = 0; j < (arr->count - 1) * arr->byte; j += arr->byte) {
+            if (*((double*) (arr + j)) > *((double*) (arr + j + 1))) {
+                err += 1;
+                break;
+            }
+        }
+
+        if (err) {
+            printf("%d - ERROR\n", i);
+        } else {
+            printf("%d - OK\n", i);
+        }
+    }
+
+    free(arr);
+}
+
+void testComplexProperties() {
+    ComplexDig a, b, result;
+    int i;
+
+    srand(time(NULL));
+
+    printf("Testing summa:\n");
+    for (i = 0; i < 100; i++) {
+        a.re = rand() % 1000;
+        a.im = rand() % 1000;
+        b.re = rand() % 1000;
+        b.im = rand() % 1000;
+
+        result.re = a.re + b.re;
+        result.im = a.im + b.im;
+
+        if (complex_equals(result, *compl_sum(a, b))) {
+            printf("%d - OK\n", i);
+        } else {
+            printf("%d - WRONG\n", i);
+        }
+    }
+
+    printf("Testing multyplying:\n");
+    for (i = 0; i < 100; i++) {
+        a.re = rand() % 1000;
+        a.im = rand() % 1000;
+        b.re = rand() % 1000;
+        b.im = rand() % 1000;
+
+        result.re = (a.re * b.re - a.im * b.im);
+        result.im = (a.im * b.re + a.re * b.im);
+
+        if (complex_equals(result, *compl_mult(a, b))) {
+            printf("%d - OK\n", i);
+        } else {
+            printf("%d - WRONG\n", i);
+        }
+    }
+}
+
 int main() {
     int req, size;
     Array* arr = NULL;
+    srand(time(NULL));
 
     do {
         printf("Enter 1 to create array with real numbers\n");
@@ -330,6 +408,7 @@ int main() {
         printf("Enter 6 to square the array's elements (function 'map')\n");
         printf("Enter 7 to mark real numbers more than 0\n");
         printf("Enter 8 to mark complex number with imagine part more than 0\n");
+        printf("Enter 9 to run tests\n");
         printf("Enter 0 for exit\n\n");
 
         scanf("%d", &req);
@@ -433,6 +512,13 @@ int main() {
             }
 
             free(whereArray);
+        }
+
+        if (req == 9) {
+            printf("Sort testing...\n");
+            testSortReal();
+            printf("\n");
+            testComplexProperties();
         }
 
     } while (req != 0);
